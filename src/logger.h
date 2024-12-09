@@ -16,6 +16,8 @@ public:
     virtual void error(const std::string &message) = 0;
 };
 
+using ILoggerPtr = std::shared_ptr<ILogger>;
+
 class IWriter {
 public:
     virtual ~IWriter() = default;

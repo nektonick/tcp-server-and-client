@@ -5,7 +5,7 @@ FileWriter::FileWriter(std::string &&targetFile): targetFile_(std::move(targetFi
 
 void FileWriter::write(const std::string &message) {
     if (std::ofstream outputStream(targetFile_, std::ios::app); outputStream.is_open()) {
-        outputStream << message << std::endl;
+        outputStream << message;
     }
 }
 

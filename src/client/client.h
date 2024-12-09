@@ -1,29 +1,12 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <optional>
-#include <vector>
 #include <boost/asio.hpp>
 
-enum class CommandType {
-    Inf,
-    Cmd,
-};
+#include "../logger.h"
+#include "../shared/structs.h"
+#include "../shared/type_aliases.h"
 
-struct Command {
-    std::string timestamp;
-    CommandType type;
-    std::optional<std::string> functionToExecute;
-};
-
-struct InfResult {
-    std::string timestamp;
-    std::vector<Command> lastCommands;
-};
-
-struct CmdResult {
-    std::string resultCode;
-};
 
 class IConnection {
 public:
@@ -32,15 +15,17 @@ public:
     using response_t = std::string;
 
     virtual response_t send(const std::string &message) = 0;
+
+    virtual std::future<response_t> sendAsync(const std::string &message) = 0;
 };
 
 class TcpConnection final : public IConnection {
 public:
-    using port_t = unsigned short;
-
     TcpConnection(const std::string &host, port_t port);
 
     response_t send(const std::string &message) override;
+
+    std::future<response_t> sendAsync(const std::string &message) override;
 
 private:
     boost::asio::io_context io_context_;
@@ -49,12 +34,13 @@ private:
 
 class Client {
 public:
-    explicit Client(std::unique_ptr<IConnection> connection);
+    explicit Client(ILoggerPtr logger, std::unique_ptr<IConnection> connection);
 
     InfResult executeInf();
 
     CmdResult executeCmd(std::string commandToExecute);
 
 private:
+    ILoggerPtr logger_;
     std::unique_ptr<IConnection> connection_;
 };
